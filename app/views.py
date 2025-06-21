@@ -187,7 +187,7 @@ def create_category(request):
 
             return JsonResponse({'success': True, 'message': 'Category created successfully'})
 
-    return JsonResponse({'success': False, 'message': 'Invalid form data'})
+    return redirect('dashboard')
 
 @login_required
 def delete_category(request, category_id):
@@ -198,4 +198,31 @@ def delete_category(request, category_id):
             category.delete()
             return JsonResponse({'success': True, 'message': 'Category deleted successfully'})
 
+    return redirect('dashboard')
+
+
+
+@login_required
+def update_record(request, record_id, record_type):
+    if request.method == 'POST':
+        form = UpdateIncomeForm(request.POST)
+        
+        if record_type == 'income':
+            got_income = Income.objects.filter(user=request.user, id=record_id).last()
+            
+            if form.is_valid() and got_income:
+                got_income.amount = form.cleaned_data['amount']
+                got_income.category = form.cleaned_data['category']
+                got_income.description = form.cleaned_data['description']
+                got_income.save()            
+            
+        elif record_type == 'expense':
+            got_expense = Expense.objects.filter(user=request.user, id=record_id).last()
+            
+            if form.is_valid() and got_expense:
+                got_expense.amount = form.cleaned_data['amount']
+                got_expense.category = form.cleaned_data['category']
+                got_expense.description = form.cleaned_data['description']
+                got_expense.save()
+            
     return redirect('dashboard')
